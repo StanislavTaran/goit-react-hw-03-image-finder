@@ -3,12 +3,16 @@ import propTypes from 'prop-types';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 import styles from './ImageGallery.module.css';
 
-const ImageGallery = ({ items }) => {
+const ImageGallery = ({ items, onClickImage }) => {
   return (
     items.length > 0 && (
       <ul className={styles.ImageGallery}>
         {items.map(item => {
-          return <ImageGalleryItem key={item.id} item={item} />;
+          return (
+            <li key={item.id}>
+              <ImageGalleryItem item={item} onClickImage={onClickImage} />
+            </li>
+          );
         })}
       </ul>
     )
@@ -21,6 +25,7 @@ ImageGallery.propTypes = {
       id: propTypes.string.isRequired,
     }),
   ).isRequired,
+  onClickImage: propTypes.func.isRequired,
 };
 
 export default ImageGallery;
