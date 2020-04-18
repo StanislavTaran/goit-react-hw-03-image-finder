@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
-import Loader from 'react-loader-spinner';
+// import Loader from 'react-loader-spinner';
 import fetchImagesAPI from './utils/images-api';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Searchbar from './components/Searchbar/Searchbar';
-// import Loader from './components/Loader/Loader';
-import ErrorNotification from './components/ErrorNotification/ErrorNotification';
+import Notification from './components/Notification/Notification';
 import Modal from './components/Modal/Modal';
 import Button from './components/Button/Button';
+import Loader from './components/Loader/Loader';
 
 export default class App extends Component {
   state = {
@@ -18,7 +18,15 @@ export default class App extends Component {
     imageForModal: null,
     currentQuery: '',
     currentPage: 1,
+    isLastPage: false,
+    isImagesNotFound: false,
   };
+
+  componentDidMount() {
+    this.setState({
+      currentQuery: 'Skywalker',
+    });
+  }
 
   componentDidUpdate(prevProps, prevState) {
     const { currentPage, currentQuery } = this.state;
@@ -34,15 +42,23 @@ export default class App extends Component {
   fetchImages = (value, page) => {
     this.setState({
       isLoading: true,
-      currentQuery: value,
     });
 
     fetchImagesAPI(value, page)
-      .then(({ data }) => {
-        const { currentPage } = this.state;
+      .then(res => {
+        console.log(res);
 
+        const { data } = res;
+        const { currentPage } = this.state;
+        const lengthOfHitsArray = data.hits.length;
         this.setState(state => {
-          return { images: state.images.concat(data.hits) };
+          return {
+            isLastPage:
+              (lengthOfHitsArray > 0 && lengthOfHitsArray < 12) || false,
+            images: state.images.concat(data.hits),
+            isImagesNotFound: lengthOfHitsArray < 1,
+            error: res.status === 200 ? null : data.status,
+          };
         });
 
         if (currentPage > 1) {
@@ -50,7 +66,7 @@ export default class App extends Component {
         }
       })
       .catch(error => this.setState({ error }))
-      .finally(this.setState({ isLoading: false }));
+      .finally(() => this.setState({ isLoading: false }));
   };
 
   onSubmit = value => {
@@ -93,23 +109,43 @@ export default class App extends Component {
   };
 
   render() {
-    const { images, isLoading, error, IsModalOpen, imageForModal } = this.state;
+    const {
+      images,
+      isLoading,
+      error,
+      IsModalOpen,
+      imageForModal,
+      isLastPage,
+      isImagesNotFound,
+    } = this.state;
 
     return (
       <>
         <Searchbar onSubmit={this.onSubmit} />
-        {error && <ErrorNotification message={error.message} />}
-        {isLoading && (
-          <Loader type="ThreeDots" color="#00BFFF" height={120} width={120} />
-        )}
+        {error && <Notification message={error.message} />}
+
         {IsModalOpen && (
           <Modal url={imageForModal} onCloseModal={this.closeModal} />
         )}
-        {!isLoading && images.length > 0 && (
-          <>
-            <ImageGallery items={images} onClickImage={this.getUrlForModal} />
-            <Button title="Load More" OnloadMore={this.OnloadMore} />
-          </>
+
+        {images.length > 0 && (
+          <ImageGallery items={images} onClickImage={this.getUrlForModal} />
+        )}
+
+        {isLoading && <Loader />}
+
+        {!isLastPage && !isImagesNotFound && !error && (
+          <Button
+            title="Load More"
+            OnloadMore={this.OnloadMore}
+            disadled={false}
+          />
+        )}
+
+        {isLastPage && <Button title="Sorry, that's all" disadled />}
+
+        {isImagesNotFound && (
+          <Notification message="Images not found,try something else" />
         )}
       </>
     );
