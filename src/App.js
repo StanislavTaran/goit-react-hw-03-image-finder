@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+import Loader from 'react-loader-spinner';
 import fetchImagesAPI from './utils/images-api';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Searchbar from './components/Searchbar/Searchbar';
-import Loader from './components/Loader/Loader';
+// import Loader from './components/Loader/Loader';
 import ErrorNotification from './components/ErrorNotification/ErrorNotification';
 import Modal from './components/Modal/Modal';
+import Button from './components/Button/Button';
 
 export default class App extends Component {
   state = {
@@ -13,27 +16,45 @@ export default class App extends Component {
     isLoading: false,
     IsModalOpen: false,
     imageForModal: null,
+    currentQuery: '',
+    currentPage: 1,
   };
 
-  componentDidMount() {
-    this.fetchImages();
+  componentDidUpdate(prevProps, prevState) {
+    const { currentPage, currentQuery } = this.state;
+
+    if (
+      prevState.currentPage !== currentPage ||
+      prevState.currentQuery !== currentQuery
+    ) {
+      this.fetchImages(currentQuery, currentPage);
+    }
   }
 
-  fetchImages = value => {
+  fetchImages = (value, page) => {
     this.setState({
       isLoading: true,
+      currentQuery: value,
     });
 
-    fetchImagesAPI(value)
-      .then(({ data }) => this.setState({ images: data.hits }))
+    fetchImagesAPI(value, page)
+      .then(({ data }) => {
+        const { currentPage } = this.state;
+
+        this.setState(state => {
+          return { images: state.images.concat(data.hits) };
+        });
+
+        if (currentPage > 1) {
+          this.scrollPage();
+        }
+      })
       .catch(error => this.setState({ error }))
       .finally(this.setState({ isLoading: false }));
-
-    this.scrollPage();
   };
 
   onSubmit = value => {
-    this.fetchImages(value);
+    this.updateCurrentQueryParams(value);
   };
 
   closeModal = () => {
@@ -57,6 +78,20 @@ export default class App extends Component {
     });
   };
 
+  OnloadMore = () => {
+    this.setState(state => {
+      return { currentPage: state.currentPage + 1 };
+    });
+  };
+
+  updateCurrentQueryParams = value => {
+    this.setState({
+      images: [],
+      currentQuery: value,
+      currentPage: 1,
+    });
+  };
+
   render() {
     const { images, isLoading, error, IsModalOpen, imageForModal } = this.state;
 
@@ -64,12 +99,17 @@ export default class App extends Component {
       <>
         <Searchbar onSubmit={this.onSubmit} />
         {error && <ErrorNotification message={error.message} />}
-        {isLoading && <Loader />}
+        {isLoading && (
+          <Loader type="ThreeDots" color="#00BFFF" height={120} width={120} />
+        )}
         {IsModalOpen && (
           <Modal url={imageForModal} onCloseModal={this.closeModal} />
         )}
-        {images.length > 0 && (
-          <ImageGallery items={images} onClickImage={this.getUrlForModal} />
+        {!isLoading && images.length > 0 && (
+          <>
+            <ImageGallery items={images} onClickImage={this.getUrlForModal} />
+            <Button title="Load More" OnloadMore={this.OnloadMore} />
+          </>
         )}
       </>
     );

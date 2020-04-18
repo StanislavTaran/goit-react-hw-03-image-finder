@@ -1,27 +1,44 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import propTypes from 'prop-types';
 import styles from './Modal.module.css';
 
 export default class Modal extends Component {
+  overlayRef = createRef();
+
   componentDidMount() {
     window.addEventListener('keydown', this.hadleKeypress);
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.hadleKeypress);
+  }
+
   hadleKeypress = e => {
-    const { code } = e.target;
     const { onCloseModal } = this.props;
-    if (code !== 'Escape') return;
+    if (e.code !== 'Escape') return;
 
     onCloseModal();
   };
 
-  render() {
-    const { url, title } = this.props;
+  handleOverlayCLick = e => {
+    const { onCloseModal } = this.props;
+    if (e.target === this.overlayRef.current) {
+      onCloseModal();
+    }
+  };
 
-    return () => (
-      <div className={styles.Overlay}>
+  render() {
+    const { url } = this.props;
+
+    return (
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+      <div
+        className={styles.Overlay}
+        ref={this.overlayRef}
+        onClick={this.handleOverlayCLick}
+      >
         <div className={styles.Modal}>
-          <img src={url} alt={title} />
+          <img src={url} alt="" className={styles.image} />
         </div>
       </div>
     );
@@ -30,6 +47,5 @@ export default class Modal extends Component {
 
 Modal.propTypes = {
   url: propTypes.string.isRequired,
-  title: propTypes.string.isRequired,
   onCloseModal: propTypes.func.isRequired,
 };
