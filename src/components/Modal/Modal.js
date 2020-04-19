@@ -31,7 +31,6 @@ export default class Modal extends Component {
     const { url } = this.props;
 
     return (
-      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
       <div
         className={styles.Overlay}
         ref={this.overlayRef}

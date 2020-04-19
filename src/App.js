@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
-// import Loader from 'react-loader-spinner';
 import fetchImagesAPI from './utils/images-api';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Searchbar from './components/Searchbar/Searchbar';
@@ -46,8 +45,6 @@ export default class App extends Component {
 
     fetchImagesAPI(value, page)
       .then(res => {
-        console.log(res);
-
         const { data } = res;
         const { currentPage } = this.state;
         const lengthOfHitsArray = data.hits.length;
