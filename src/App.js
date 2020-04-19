@@ -132,9 +132,7 @@ export default class App extends Component {
           <ImageGallery items={images} onClickImage={this.getUrlForModal} />
         )}
 
-        {isLoading && <Loader />}
-
-        {!isLastPage && !isImagesNotFound && !error && (
+        {!isLastPage && !isImagesNotFound && !error && !isLoading && (
           <Button
             title="Load More"
             OnloadMore={this.OnloadMore}
@@ -142,11 +140,14 @@ export default class App extends Component {
           />
         )}
 
-        {isLastPage && <Button title="Sorry, that's all" disadled />}
+        {isLastPage && !isLoading && (
+          <Button title="Sorry, that's all" disadled />
+        )}
 
         {isImagesNotFound && (
           <Notification message="Images not found,try something else" />
         )}
+        {isLoading && <Loader />}
       </>
     );
   }

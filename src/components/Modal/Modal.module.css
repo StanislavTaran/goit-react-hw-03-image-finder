@@ -18,4 +18,6 @@
 
 .image {
   max-width: 900px;
+  max-width: 90vh;
+  border: 2px #47f512 solid;
 }

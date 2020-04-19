@@ -7,8 +7,8 @@ const myLoader = () => {
   return (
     <div className={styles.loader}>
       <Loader
-        type="BallTriangle"
-        color="#5e1515"
+        type="ThreeDots"
+        color="#403a39"
         height={100}
         width={100}
         timeout={5000}
