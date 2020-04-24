@@ -2,16 +2,16 @@ import React from 'react';
 import propTypes from 'prop-types';
 import styles from './Button.module.css';
 
-const Button = ({ title, OnloadMore, disadled }) => {
-  const buttonClasses = disadled ? styles.disabled : styles.Button;
+const Button = ({ title, OnClickButton, IsDisadled }) => {
+  const buttonClasses = IsDisadled ? styles.disabled : styles.Button;
 
   return (
     <div className={styles.container}>
       <button
         type="button"
         className={buttonClasses}
-        onClick={OnloadMore}
-        disabled={disadled}
+        onClick={OnClickButton}
+        disabled={IsDisadled}
       >
         {title}
       </button>
@@ -20,13 +20,13 @@ const Button = ({ title, OnloadMore, disadled }) => {
 };
 
 Button.defaultProps = {
-  OnloadMore: null,
+  OnClickButton: null,
 };
 
 Button.propTypes = {
   title: propTypes.string.isRequired,
-  disadled: propTypes.bool.isRequired,
-  OnloadMore: propTypes.func,
+  IsDisadled: propTypes.bool.isRequired,
+  OnClickButton: propTypes.func,
 };
 
 export default Button;

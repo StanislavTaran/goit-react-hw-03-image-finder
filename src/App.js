@@ -13,17 +13,15 @@ export default class App extends Component {
     images: [],
     error: null,
     isLoading: false,
-    IsModalOpen: false,
-    imageForModal: null,
+    largeImage: null,
     currentQuery: '',
     currentPage: 1,
     isLastPage: false,
-    isImagesNotFound: false,
   };
 
   componentDidMount() {
     this.setState({
-      currentQuery: 'Skywalker',
+      currentQuery: 'skywalker',
     });
   }
 
@@ -44,17 +42,13 @@ export default class App extends Component {
     });
 
     fetchImagesAPI(value, page)
-      .then(res => {
-        const { data } = res;
+      .then(hits => {
         const { currentPage } = this.state;
-        const lengthOfHitsArray = data.hits.length;
+
         this.setState(state => {
           return {
-            isLastPage:
-              (lengthOfHitsArray > 0 && lengthOfHitsArray < 12) || false,
-            images: state.images.concat(data.hits),
-            isImagesNotFound: lengthOfHitsArray < 1,
-            error: res.status === 200 ? null : data.status,
+            isLastPage: (hits.length > 0 && hits.length < 12) || false,
+            images: state.images.concat(hits),
           };
         });
 
@@ -72,15 +66,14 @@ export default class App extends Component {
 
   closeModal = () => {
     this.setState({
-      IsModalOpen: false,
+      largeImage: null,
     });
   };
 
   getUrlForModal = e => {
     const url = e.target.dataset.src;
     this.setState({
-      imageForModal: url,
-      IsModalOpen: true,
+      largeImage: url,
     });
   };
 
@@ -106,42 +99,32 @@ export default class App extends Component {
   };
 
   render() {
-    const {
-      images,
-      isLoading,
-      error,
-      IsModalOpen,
-      imageForModal,
-      isLastPage,
-      isImagesNotFound,
-    } = this.state;
+    const { images, isLoading, error, largeImage, isLastPage } = this.state;
+    const isShouldRenderLoadMoreButton =
+      !isLastPage && !images.length < 1 && !error && !isLoading;
 
     return (
       <>
         <Searchbar onSubmit={this.onSubmit} />
         {error && <Notification message={error.message} />}
 
-        {IsModalOpen && (
-          <Modal url={imageForModal} onCloseModal={this.closeModal} />
+        {largeImage && (
+          <Modal url={largeImage} onCloseModal={this.closeModal} />
         )}
 
         {images.length > 0 && (
           <ImageGallery items={images} onClickImage={this.getUrlForModal} />
         )}
 
-        {!isLastPage && !isImagesNotFound && !error && !isLoading && (
-          <Button
-            title="Load More"
-            OnloadMore={this.OnloadMore}
-            disadled={false}
-          />
+        {isShouldRenderLoadMoreButton && (
+          <Button title="Load More" OnClickButton={this.OnloadMore} />
         )}
 
         {isLastPage && !isLoading && (
-          <Button title="Sorry, that's all" disadled />
+          <Button title="Sorry, that's all" IsDisadled />
         )}
 
-        {isImagesNotFound && (
+        {images.length < 1 && (
           <Notification message="Images not found,try something else" />
         )}
         {isLoading && <Loader />}

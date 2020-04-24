@@ -5,17 +5,15 @@ import styles from './ImageGallery.module.css';
 
 const ImageGallery = ({ items, onClickImage }) => {
   return (
-    items.length > 0 && (
-      <ul className={styles.ImageGallery}>
-        {items.map(item => {
-          return (
-            <li key={item.id}>
-              <ImageGalleryItem item={item} onClickImage={onClickImage} />
-            </li>
-          );
-        })}
-      </ul>
-    )
+    <ul className={styles.ImageGallery}>
+      {items.map(item => {
+        return (
+          <li key={item.id}>
+            <ImageGalleryItem item={item} onClickImage={onClickImage} />
+          </li>
+        );
+      })}
+    </ul>
   );
 };
 
