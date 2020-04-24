@@ -21,11 +21,12 @@ const Button = ({ title, OnClickButton, IsDisadled }) => {
 
 Button.defaultProps = {
   OnClickButton: null,
+  IsDisadled: false,
 };
 
 Button.propTypes = {
   title: propTypes.string.isRequired,
-  IsDisadled: propTypes.bool.isRequired,
+  IsDisadled: propTypes.bool,
   OnClickButton: propTypes.func,
 };
 
